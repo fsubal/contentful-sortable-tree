@@ -1,0 +1,22 @@
+{
+  "id": "contentful-sortable-tree",
+  "name": "contentful-sortable-tree",
+  "srcdoc": "./build/index.html",
+  "fieldTypes": ["Object"],
+  "parameters": {
+    "instance": [
+      {
+        "id": "width",
+        "name": "Width of the container",
+        "type": "Number",
+        "default": 300
+      },
+      {
+        "id": "height",
+        "name": "Height of the container",
+        "type": "Number",
+        "default": 150
+      }
+    ]
+  }
+}
