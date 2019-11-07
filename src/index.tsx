@@ -1,10 +1,10 @@
+import 'dragula/dist/dragula.css'
 import '@contentful/forma-36-react-components/dist/styles.css'
 
-import React, { useRef } from 'react'
-import { DndProvider, useDrag, useDrop } from 'react-dnd'
-import HTML5Backend from 'react-dnd-html5-backend'
+import React, { useEffect } from 'react'
 import { render } from 'react-dom'
 import { init, FieldExtensionSDK } from 'contentful-ui-extensions-sdk'
+import dragula from 'dragula'
 
 interface Props {
   sdk: FieldExtensionSDK
@@ -17,8 +17,43 @@ const items = [
 ]
 
 export function App({ sdk }: Props) {
+  useEffect(() => {
+    // カテゴリ内の item を sortable にする
+    const items = dragula(Array.from(document.querySelectorAll('.js-category')), {
+      direction: 'vertical',
+      accepts(el) {
+        if (!el) {
+          return false
+        }
+        return el.classList.contains('js-item')
+      }
+    })
+
+    // カテゴリそのものを sortable にする
+    const categories = dragula(Array.from(document.querySelectorAll('.js-root')), {
+      direction: 'vertical',
+      moves(_el, _source, handle) {
+        if (!handle) {
+          return false
+        }
+        return handle.classList.contains('js-category-handle')
+      },
+      accepts(el) {
+        if (!el) {
+          return false
+        }
+        return el.classList.contains('js-category')
+      }
+    })
+
+    return () => {
+      items.destroy()
+      categories.destroy()
+    }
+  }, [])
+
   return (
-    <Root>
+    <div className="js-root">
       <Category name="アクセサリー">
         {items.map(item => (
           <Item {...item} />
@@ -29,18 +64,6 @@ export function App({ sdk }: Props) {
           <Item {...item} />
         ))}
       </Category>
-    </Root>
-  )
-}
-
-const Root: React.FC = ({ children }) => {
-  const [, makeDroppable] = useDrop({
-    accept: 'category'
-  })
-
-  return (
-    <div ref={makeDroppable}>
-      <div>{children}</div>
     </div>
   )
 }
@@ -50,21 +73,10 @@ interface Category {
 }
 
 const Category: React.FC<Category> = ({ name, children }) => {
-  const ref = useRef<HTMLDivElement | null>(null)
-  const [, makeDraggable] = useDrag({
-    item: { name, type: 'category' }
-  })
-
-  const [, makeDroppable] = useDrop<Item & { type: 'item' }, unknown, unknown>({
-    accept: 'item'
-  })
-
-  makeDraggable(makeDroppable(ref))
-
   return (
-    <div ref={ref}>
-      <div>{name}</div>
-      <div>{children}</div>
+    <div>
+      <div className="js-category-handle">{name}</div>
+      <div className="js-category">{children}</div>
     </div>
   )
 }
@@ -76,13 +88,8 @@ interface Item {
 }
 
 const Item: React.FC<Item> = ({ slug, name }) => {
-  const [, makeDraggable] = useDrag({
-    item: { slug, type: 'item' }
-    // collect: ({ isDragging }) => isDragging()
-  })
-
   return (
-    <div ref={makeDraggable}>
+    <div className="js-item">
       <div>{name}</div>
     </div>
   )
@@ -92,12 +99,7 @@ init((sdk: any) => {
   // const initial = sdk.field.getValue()
   // const { width, height } = sdk.parameters.instance as any
 
-  render(
-    <DndProvider backend={HTML5Backend}>
-      <App sdk={sdk} />
-    </DndProvider>,
-    document.getElementById('root')
-  )
+  render(<App sdk={sdk} />, document.getElementById('root'))
 })
 
 /**
