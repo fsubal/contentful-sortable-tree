@@ -1,0 +1,16 @@
+{
+  "id": "contentful-sortable-tree",
+  "name": "contentful-sortable-tree",
+  "srcdoc": "./build/index.html",
+  "fieldTypes": ["Object"],
+  "parameters": {
+    "instance": [
+      {
+        "id": "canDuplicate",
+        "name": "Allow duplicated item between categories",
+        "type": "Boolean",
+        "default": false
+      }
+    ]
+  }
+}
