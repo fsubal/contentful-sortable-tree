@@ -1,83 +1,75 @@
 import 'dragula/dist/dragula.css'
-import '@contentful/forma-36-react-components/dist/styles.css'
 
 import React, { useEffect } from 'react'
 import { render } from 'react-dom'
 import { init, FieldExtensionSDK } from 'contentful-ui-extensions-sdk'
-import dragula from 'dragula'
+import useDrag, { classes } from './useDrag'
+import styled from 'styled-components'
 
 interface Props {
   sdk: FieldExtensionSDK
 }
 
-const items = [
-  { slug: 'a', name: 'aaa', index: 0 },
-  { slug: 'b', name: 'bbb', index: 1 },
-  { slug: 'c', name: 'ccc', index: 2 }
+const items1 = [
+  { slug: 'a', name: 'アクリルキーホルダー', index: 0 },
+  { slug: 'b', name: '缶バッジ', index: 1 },
+  { slug: 'c', name: 'ステッカー', index: 2 }
 ]
 
-export function App({ sdk }: Props) {
+const items2 = [
+  { slug: 'a', name: '白Tシャツ', index: 0 },
+  { slug: 'b', name: 'Tシャツ（短納期）', index: 1 },
+  { slug: 'c', name: 'カラーTシャツ', index: 2 }
+]
+
+const App = React.memo(({ sdk }: Props) => {
+  useDrag()
   useEffect(() => {
-    // カテゴリ内の item を sortable にする
-    const items = dragula(Array.from(document.querySelectorAll('.js-category')), {
-      direction: 'vertical',
-      accepts(el) {
-        if (!el) {
-          return false
-        }
-        return el.classList.contains('js-item')
-      }
-    })
-
-    // カテゴリそのものを sortable にする
-    const categories = dragula(Array.from(document.querySelectorAll('.js-root')), {
-      direction: 'vertical',
-      moves(_el, _source, handle) {
-        if (!handle) {
-          return false
-        }
-        return handle.classList.contains('js-category-handle')
-      },
-      accepts(el) {
-        if (!el) {
-          return false
-        }
-        return el.classList.contains('js-category')
-      }
-    })
-
-    return () => {
-      items.destroy()
-      categories.destroy()
-    }
+    sdk.window.startAutoResizer()
   }, [])
 
   return (
     <div className="js-root">
       <Category name="アクセサリー">
-        {items.map(item => (
-          <Item {...item} />
+        {items1.map(item => (
+          <Item key={item.slug} {...item} />
         ))}
       </Category>
       <Category name="Tシャツ">
-        {items.map(item => (
-          <Item {...item} />
+        {items2.map(item => (
+          <Item key={item.slug} {...item} />
         ))}
       </Category>
     </div>
   )
-}
+})
 
 interface Category {
   name: string
 }
 
+const Container = styled.div`
+  & + & {
+    margin-top: 16px;
+  }
+`
+
+const Handle = styled.div`
+  padding: 16px;
+  background: #eee;
+  cursor: grab;
+
+  & + & {
+    margin-top: 16px;
+  }
+`
+
 const Category: React.FC<Category> = ({ name, children }) => {
   return (
-    <div>
-      <div className="js-category-handle">{name}</div>
-      <div className="js-category">{children}</div>
-    </div>
+    <Container>
+      <Handle className={classes.handle}>{name}</Handle>
+      <div className={classes.category}>{children}</div>
+    </Container>
   )
 }
 
@@ -87,11 +79,16 @@ interface Item {
   name: string
 }
 
-const Item: React.FC<Item> = ({ slug, name }) => {
+const Child = styled.div`
+  padding: 8px;
+  cursor: grab;
+`
+
+const Item: React.FC<Item> = ({ name }) => {
   return (
-    <div className="js-item">
+    <Child className={classes.item}>
       <div>{name}</div>
-    </div>
+    </Child>
   )
 }
 
