@@ -1,17 +1,55 @@
 import dragula from 'dragula'
-import { useEffect } from 'react'
+import { useEffect, useMemo } from 'react'
+import { FieldExtensionSDK } from 'contentful-ui-extensions-sdk'
 
 export const classes = {
   root: 'js-root',
   category: 'js-category',
   handle: 'js-handle',
   item: 'js-item'
+} as const
+
+interface Item {
+  slug: string
+  name: string
 }
 
-export default function useDrag() {
+interface Field {
+  [category: string]: Item[]
+}
+
+const toField = (root: HTMLElement): Field => {
+  const categories = Array.from(root.querySelectorAll<HTMLElement>('.' + classes.category))
+
+  return categories.reduce((field, category) => {
+    const items = Array.from(category.querySelectorAll<HTMLElement>('.' + classes.item))
+
+    return {
+      ...field,
+      [category.dataset.category!]: items.map<Item>(el => ({
+        slug: el.dataset.slug!,
+        name: el.dataset.name!
+      }))
+    }
+  }, {})
+}
+
+export default function useDrag(sdk: FieldExtensionSDK) {
+  const categories = useMemo(() => {
+    return Array.from(document.getElementsByClassName(classes.category))
+  }, [])
+
+  const root = useMemo(() => {
+    return document.getElementsByClassName(classes.root)[0] as HTMLElement
+  }, [])
+
+  const autoSave = (root: HTMLElement) => {
+    sdk.field.setValue(toField(root))
+  }
+
   useEffect(() => {
     // カテゴリ内の item を sortable にする
-    const items = dragula(Array.from(document.getElementsByClassName(classes.category)), {
+    const itemSort = dragula(categories, {
       direction: 'vertical',
       accepts(el) {
         if (!el) {
@@ -19,10 +57,10 @@ export default function useDrag() {
         }
         return el.classList.contains(classes.item)
       }
-    })
+    }).on('dragend', () => autoSave(root))
 
     // カテゴリそのものを sortable にする
-    const categories = dragula(Array.from(document.getElementsByClassName(classes.root)), {
+    const categorySort = dragula([root], {
       direction: 'vertical',
       moves(_el, _source, handle) {
         if (!handle) {
@@ -30,11 +68,11 @@ export default function useDrag() {
         }
         return handle.classList.contains(classes.handle)
       }
-    })
+    }).on('dragend', () => autoSave(root))
 
     return () => {
-      items.destroy()
-      categories.destroy()
+      itemSort.destroy()
+      categorySort.destroy()
     }
   }, [])
 }

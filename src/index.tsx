@@ -23,7 +23,7 @@ const items2 = [
 ]
 
 const App = React.memo(({ sdk }: Props) => {
-  useDrag()
+  useDrag(sdk)
   useEffect(() => {
     sdk.window.startAutoResizer()
   }, [])
@@ -73,7 +73,7 @@ const Handle = styled.div`
 
 const Category: React.FC<Category> = ({ name, children }) => {
   return (
-    <Container>
+    <Container data-category={name}>
       <Handle className={classes.handle}>{name}</Handle>
       <ItemList className={classes.category}>{children}</ItemList>
     </Container>
@@ -91,9 +91,9 @@ const Child = styled.div`
   cursor: grab;
 `
 
-const Item: React.FC<Item> = ({ name }) => {
+const Item: React.FC<Item> = ({ slug, name }) => {
   return (
-    <Child className={classes.item}>
+    <Child className={classes.item} data-slug={slug} data-name={name}>
       <div>{name}</div>
     </Child>
   )
