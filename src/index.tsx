@@ -54,6 +54,13 @@ const Container = styled.div`
   }
 `
 
+const ItemList = styled.div`
+  /** 空になったときにドロップ可能領域が 0 になると詰んでしまうので、隙間を作る */
+  &:empty {
+    padding: 16px;
+  }
+`
+
 const Handle = styled.div`
   padding: 16px;
   background: #eee;
@@ -68,7 +75,7 @@ const Category: React.FC<Category> = ({ name, children }) => {
   return (
     <Container>
       <Handle className={classes.handle}>{name}</Handle>
-      <div className={classes.category}>{children}</div>
+      <ItemList className={classes.category}>{children}</ItemList>
     </Container>
   )
 }

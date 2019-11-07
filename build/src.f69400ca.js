@@ -36150,19 +36150,20 @@ var App = react_1.default.memo(function (_a) {
   })));
 });
 var Container = styled_components_1.default.div(templateObject_1 || (templateObject_1 = __makeTemplateObject(["\n  & + & {\n    margin-top: 16px;\n  }\n"], ["\n  & + & {\n    margin-top: 16px;\n  }\n"])));
-var Handle = styled_components_1.default.div(templateObject_2 || (templateObject_2 = __makeTemplateObject(["\n  padding: 16px;\n  background: #eee;\n  cursor: grab;\n\n  & + & {\n    margin-top: 16px;\n  }\n"], ["\n  padding: 16px;\n  background: #eee;\n  cursor: grab;\n\n  & + & {\n    margin-top: 16px;\n  }\n"])));
+var ItemList = styled_components_1.default.div(templateObject_2 || (templateObject_2 = __makeTemplateObject(["\n  /** \u7A7A\u306B\u306A\u3063\u305F\u3068\u304D\u306B\u30C9\u30ED\u30C3\u30D7\u53EF\u80FD\u9818\u57DF\u304C 0 \u306B\u306A\u308B\u3068\u8A70\u3093\u3067\u3057\u307E\u3046\u306E\u3067\u3001\u9699\u9593\u3092\u4F5C\u308B */\n  &:empty {\n    padding: 16px;\n  }\n"], ["\n  /** \u7A7A\u306B\u306A\u3063\u305F\u3068\u304D\u306B\u30C9\u30ED\u30C3\u30D7\u53EF\u80FD\u9818\u57DF\u304C 0 \u306B\u306A\u308B\u3068\u8A70\u3093\u3067\u3057\u307E\u3046\u306E\u3067\u3001\u9699\u9593\u3092\u4F5C\u308B */\n  &:empty {\n    padding: 16px;\n  }\n"])));
+var Handle = styled_components_1.default.div(templateObject_3 || (templateObject_3 = __makeTemplateObject(["\n  padding: 16px;\n  background: #eee;\n  cursor: grab;\n\n  & + & {\n    margin-top: 16px;\n  }\n"], ["\n  padding: 16px;\n  background: #eee;\n  cursor: grab;\n\n  & + & {\n    margin-top: 16px;\n  }\n"])));
 
 var Category = function Category(_a) {
   var name = _a.name,
       children = _a.children;
   return react_1.default.createElement(Container, null, react_1.default.createElement(Handle, {
     className: useDrag_1.classes.handle
-  }, name), react_1.default.createElement("div", {
+  }, name), react_1.default.createElement(ItemList, {
     className: useDrag_1.classes.category
   }, children));
 };
 
-var Child = styled_components_1.default.div(templateObject_3 || (templateObject_3 = __makeTemplateObject(["\n  padding: 8px;\n  cursor: grab;\n"], ["\n  padding: 8px;\n  cursor: grab;\n"])));
+var Child = styled_components_1.default.div(templateObject_4 || (templateObject_4 = __makeTemplateObject(["\n  padding: 8px;\n  cursor: grab;\n"], ["\n  padding: 8px;\n  cursor: grab;\n"])));
 
 var Item = function Item(_a) {
   var name = _a.name;
@@ -36187,7 +36188,7 @@ if (module.hot) {
   module.hot.accept();
 }
 
-var templateObject_1, templateObject_2, templateObject_3;
+var templateObject_1, templateObject_2, templateObject_3, templateObject_4;
 },{"dragula/dist/dragula.css":"../node_modules/dragula/dist/dragula.css","react":"../node_modules/react/index.js","react-dom":"../node_modules/react-dom/index.js","contentful-ui-extensions-sdk":"../node_modules/contentful-ui-extensions-sdk/dist/cf-extension-api.js","./useDrag":"useDrag.ts","styled-components":"../node_modules/styled-components/dist/styled-components.browser.esm.js"}],"../node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
 var global = arguments[3];
 var OVERLAY_ID = '__parcel__error__overlay__';
