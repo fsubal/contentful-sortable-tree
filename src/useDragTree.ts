@@ -1,5 +1,5 @@
 import dragula from 'dragula'
-import { useEffect, useMemo } from 'react'
+import { useEffect, useState } from 'react'
 import { FieldExtensionSDK } from 'contentful-ui-extensions-sdk'
 import { Field, Item } from './types'
 
@@ -13,34 +13,38 @@ export const classes = {
 const toField = (root: HTMLElement): Field => {
   const categories = Array.from(root.querySelectorAll<HTMLElement>('.' + classes.category))
 
-  return categories.reduce((field, category) => {
+  return categories.reduce((field, category, index) => {
     const items = Array.from(category.querySelectorAll<HTMLElement>('.' + classes.item))
 
     return {
       ...field,
-      [category.dataset.category!]: items.map<Item>(el => ({
-        slug: el.dataset.slug!,
-        name: el.dataset.name!
-      }))
+      [category.dataset.category!]: {
+        index: index,
+        children: items.map<Item>(el => ({
+          slug: el.dataset.slug!,
+          name: el.dataset.name!
+        }))
+      }
     }
   }, {})
 }
 
-export default function useDrag(sdk: FieldExtensionSDK) {
-  const categories = useMemo(() => {
-    return Array.from(document.getElementsByClassName(classes.category))
-  }, [])
-
-  const root = useMemo(() => {
-    return document.getElementsByClassName(classes.root)[0] as HTMLElement
-  }, [])
+export default function useDragTree(sdk: FieldExtensionSDK, initial: Field) {
+  const [tree, setTree] = useState(initial)
 
   const autoSave = (root: HTMLElement) => {
-    sdk.field.setValue(toField(root))
+    const next = toField(root)
+    console.log(next)
+
+    setTree(next)
+    sdk.field.setValue(next)
   }
 
   useEffect(() => {
+    const root = document.getElementsByClassName(classes.root)[0] as HTMLElement
+
     // カテゴリ内の item を sortable にする
+    const categories = Array.from(document.getElementsByClassName(classes.category))
     const itemSort = dragula(categories, {
       direction: 'vertical',
       accepts(el) {
@@ -67,4 +71,6 @@ export default function useDrag(sdk: FieldExtensionSDK) {
       categorySort.destroy()
     }
   }, [])
+
+  return tree
 }

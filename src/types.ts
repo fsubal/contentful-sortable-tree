@@ -8,5 +8,8 @@ export interface Item {
 }
 
 export interface Field {
-  [category: string]: Item[]
+  [category: string]: {
+    index: number
+    children: Item[]
+  }
 }

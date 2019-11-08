@@ -1,9 +1,11 @@
 import 'dragula/dist/dragula.css'
 
+import toPairs from 'lodash/toPairs'
+import sortBy from 'lodash/sortBy'
 import React, { useEffect } from 'react'
 import { render } from 'react-dom'
 import { init, FieldExtensionSDK } from 'contentful-ui-extensions-sdk'
-import useDrag, { classes } from './useDrag'
+import useDragTree, { classes } from './useDragTree'
 import styled from 'styled-components'
 import { Item, Category, Field } from './types'
 
@@ -13,39 +15,29 @@ interface Props {
   canDuplicate: boolean
 }
 
-const items1 = [
-  { slug: 'a', name: 'アクリルキーホルダー' },
-  { slug: 'b', name: '缶バッジ' },
-  { slug: 'c', name: 'ステッカー' }
-]
+const App = ({ sdk, initial }: Props) => {
+  useDragTree(sdk, initial)
 
-const items2 = [
-  { slug: 'a', name: '白Tシャツ' },
-  { slug: 'b', name: 'Tシャツ（短納期）' },
-  { slug: 'c', name: 'カラーTシャツ' }
-]
-
-const App = React.memo(({ sdk }: Props) => {
-  useDrag(sdk)
   useEffect(() => {
     sdk.window.startAutoResizer()
   }, [])
 
+  const entries = sortBy(toPairs(initial), ([, category]) => category.index)
+
+  // dragula の DOM 操作と React のレンダリングが食い違うのを防ぐため、
+  // 初回レンダリングしかしない
   return (
     <div className="js-root">
-      <CategoryTree name="アクセサリー">
-        {items1.map(item => (
-          <ItemNode key={item.slug} {...item} />
-        ))}
-      </CategoryTree>
-      <CategoryTree name="Tシャツ">
-        {items2.map(item => (
-          <ItemNode key={item.slug} {...item} />
-        ))}
-      </CategoryTree>
+      {entries.map(([name, category]) => (
+        <CategoryTree key={name} name={name}>
+          {category.children.map(item => (
+            <ItemNode key={item.slug} {...item} />
+          ))}
+        </CategoryTree>
+      ))}
     </div>
   )
-})
+}
 
 const Container = styled.div`
   & + & {
@@ -72,9 +64,11 @@ const Handle = styled.div`
 
 const CategoryTree: React.FC<Category> = ({ name, children }) => {
   return (
-    <Container data-category={name}>
+    <Container>
       <Handle className={classes.handle}>{name}</Handle>
-      <ItemList className={classes.category}>{children}</ItemList>
+      <ItemList className={classes.category} data-category={name}>
+        {children}
+      </ItemList>
     </Container>
   )
 }
@@ -92,8 +86,27 @@ const ItemNode: React.FC<Item> = ({ slug, name }) => {
   )
 }
 
+const sample = {
+  アクセサリー: {
+    index: 0,
+    children: [
+      { slug: 'a0', name: 'アクリルキーホルダー' },
+      { slug: 'b0', name: '缶バッジ' },
+      { slug: 'c0', name: 'ステッカー' }
+    ]
+  },
+  Tシャツ: {
+    index: 1,
+    children: [
+      { slug: 'a1', name: '白Tシャツ' },
+      { slug: 'b1', name: 'Tシャツ（短納期）' },
+      { slug: 'c1', name: 'カラーTシャツ' }
+    ]
+  }
+}
+
 init((sdk: any) => {
-  const initial = sdk.field.getValue()
+  const initial = sdk.field.getValue() || sample
   const { canDuplicate } = sdk.parameters.instance
 
   render(
