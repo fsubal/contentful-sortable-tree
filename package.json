@@ -13,7 +13,6 @@
     "@testing-library/react": "8.0.4",
     "@types/dragula": "^2.1.34",
     "@types/jest": "24.0.15",
-    "@types/lodash": "^4.14.145",
     "@types/react": "^16.8.17",
     "@types/react-dom": "^16.8.4",
     "@types/styled-components": "^4.1.21",
@@ -43,7 +42,6 @@
     "@contentful/forma-36-tokens": "^0.3.0",
     "contentful-ui-extensions-sdk": "3.9.0",
     "dragula": "^3.7.2",
-    "lodash": "^4.17.15",
     "react": "^16.8.6",
     "react-dom": "^16.8.6",
     "styled-components": "^4.4.1"

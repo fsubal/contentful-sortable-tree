@@ -1,7 +1,7 @@
 import dragula from 'dragula'
 import { useEffect, useState } from 'react'
 import { FieldExtensionSDK } from 'contentful-ui-extensions-sdk'
-import { Field, Item } from './types'
+import { Item, Category } from './types'
 
 export const classes = {
   root: 'js-root',
@@ -10,31 +10,27 @@ export const classes = {
   item: 'js-item'
 } as const
 
-const toField = (root: HTMLElement): Field => {
+const toField = (root: HTMLElement): Category[] => {
   const categories = Array.from(root.querySelectorAll<HTMLElement>('.' + classes.category))
 
-  return categories.reduce((field, category, index) => {
+  return categories.map(category => {
     const items = Array.from(category.querySelectorAll<HTMLElement>('.' + classes.item))
 
     return {
-      ...field,
-      [category.dataset.category!]: {
-        index: index,
-        children: items.map<Item>(el => ({
-          slug: el.dataset.slug!,
-          name: el.dataset.name!
-        }))
-      }
+      name: category.dataset.category!,
+      children: items.map<Item>(el => ({
+        slug: el.dataset.slug!,
+        name: el.dataset.name!
+      }))
     }
   }, {})
 }
 
-export default function useDragTree(sdk: FieldExtensionSDK, initial: Field) {
+export default function useDragTree(sdk: FieldExtensionSDK, initial: Category[]) {
   const [tree, setTree] = useState(initial)
 
   const autoSave = (root: HTMLElement) => {
     const next = toField(root)
-    console.log(next)
 
     setTree(next)
     sdk.field.setValue(next)
