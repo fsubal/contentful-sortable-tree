@@ -23,7 +23,7 @@ const App = ({ sdk, initial }: Props) => {
   // dragula の DOM 操作と React のレンダリングが食い違うのを防ぐため、
   // 初回レンダリングしかしない
   return (
-    <div className="js-root">
+    <div className={classes.root}>
       {initial.map(category => (
         <CategoryTree key={category.name} category={category} />
       ))}
