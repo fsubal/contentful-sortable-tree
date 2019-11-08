@@ -31621,6 +31621,20 @@ module.exports = dragula;
 },{"contra/emitter":"../node_modules/contra/emitter.js","crossvent":"../node_modules/crossvent/src/crossvent.js","./classes":"../node_modules/dragula/classes.js"}],"useDrag.ts":[function(require,module,exports) {
 "use strict";
 
+var __assign = this && this.__assign || function () {
+  __assign = Object.assign || function (t) {
+    for (var s, i = 1, n = arguments.length; i < n; i++) {
+      s = arguments[i];
+
+      for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p)) t[p] = s[p];
+    }
+
+    return t;
+  };
+
+  return __assign.apply(this, arguments);
+};
+
 var __importDefault = this && this.__importDefault || function (mod) {
   return mod && mod.__esModule ? mod : {
     "default": mod
@@ -31642,10 +31656,36 @@ exports.classes = {
   item: 'js-item'
 };
 
-function useDrag() {
+var toField = function toField(root) {
+  var categories = Array.from(root.querySelectorAll('.' + exports.classes.category));
+  return categories.reduce(function (field, category) {
+    var _a;
+
+    var items = Array.from(category.querySelectorAll('.' + exports.classes.item));
+    return __assign({}, field, (_a = {}, _a[category.dataset.category] = items.map(function (el) {
+      return {
+        slug: el.dataset.slug,
+        name: el.dataset.name
+      };
+    }), _a));
+  }, {});
+};
+
+function useDrag(sdk) {
+  var categories = react_1.useMemo(function () {
+    return Array.from(document.getElementsByClassName(exports.classes.category));
+  }, []);
+  var root = react_1.useMemo(function () {
+    return document.getElementsByClassName(exports.classes.root)[0];
+  }, []);
+
+  var autoSave = function autoSave(root) {
+    sdk.field.setValue(toField(root));
+  };
+
   react_1.useEffect(function () {
     // カテゴリ内の item を sortable にする
-    var items = dragula_1.default(Array.from(document.getElementsByClassName(exports.classes.category)), {
+    var itemSort = dragula_1.default(categories, {
       direction: 'vertical',
       accepts: function accepts(el) {
         if (!el) {
@@ -31654,9 +31694,11 @@ function useDrag() {
 
         return el.classList.contains(exports.classes.item);
       }
+    }).on('dragend', function () {
+      return autoSave(root);
     }); // カテゴリそのものを sortable にする
 
-    var categories = dragula_1.default(Array.from(document.getElementsByClassName(exports.classes.root)), {
+    var categorySort = dragula_1.default([root], {
       direction: 'vertical',
       moves: function moves(_el, _source, handle) {
         if (!handle) {
@@ -31665,10 +31707,12 @@ function useDrag() {
 
         return handle.classList.contains(exports.classes.handle);
       }
+    }).on('dragend', function () {
+      return autoSave(root);
     });
     return function () {
-      items.destroy();
-      categories.destroy();
+      itemSort.destroy();
+      categorySort.destroy();
     };
   }, []);
 }
@@ -36103,48 +36147,42 @@ var styled_components_1 = __importDefault(require("styled-components"));
 
 var items1 = [{
   slug: 'a',
-  name: 'アクリルキーホルダー',
-  index: 0
+  name: 'アクリルキーホルダー'
 }, {
   slug: 'b',
-  name: '缶バッジ',
-  index: 1
+  name: '缶バッジ'
 }, {
   slug: 'c',
-  name: 'ステッカー',
-  index: 2
+  name: 'ステッカー'
 }];
 var items2 = [{
   slug: 'a',
-  name: '白Tシャツ',
-  index: 0
+  name: '白Tシャツ'
 }, {
   slug: 'b',
-  name: 'Tシャツ（短納期）',
-  index: 1
+  name: 'Tシャツ（短納期）'
 }, {
   slug: 'c',
-  name: 'カラーTシャツ',
-  index: 2
+  name: 'カラーTシャツ'
 }];
 var App = react_1.default.memo(function (_a) {
   var sdk = _a.sdk;
-  useDrag_1.default();
+  useDrag_1.default(sdk);
   react_1.useEffect(function () {
     sdk.window.startAutoResizer();
   }, []);
   return react_1.default.createElement("div", {
     className: "js-root"
-  }, react_1.default.createElement(Category, {
+  }, react_1.default.createElement(CategoryTree, {
     name: "\u30A2\u30AF\u30BB\u30B5\u30EA\u30FC"
   }, items1.map(function (item) {
-    return react_1.default.createElement(Item, __assign({
+    return react_1.default.createElement(ItemNode, __assign({
       key: item.slug
     }, item));
-  })), react_1.default.createElement(Category, {
+  })), react_1.default.createElement(CategoryTree, {
     name: "T\u30B7\u30E3\u30C4"
   }, items2.map(function (item) {
-    return react_1.default.createElement(Item, __assign({
+    return react_1.default.createElement(ItemNode, __assign({
       key: item.slug
     }, item));
   })));
@@ -36153,10 +36191,12 @@ var Container = styled_components_1.default.div(templateObject_1 || (templateObj
 var ItemList = styled_components_1.default.div(templateObject_2 || (templateObject_2 = __makeTemplateObject(["\n  /** \u7A7A\u306B\u306A\u3063\u305F\u3068\u304D\u306B\u30C9\u30ED\u30C3\u30D7\u53EF\u80FD\u9818\u57DF\u304C 0 \u306B\u306A\u308B\u3068\u8A70\u3093\u3067\u3057\u307E\u3046\u306E\u3067\u3001\u9699\u9593\u3092\u4F5C\u308B */\n  &:empty {\n    padding: 16px;\n  }\n"], ["\n  /** \u7A7A\u306B\u306A\u3063\u305F\u3068\u304D\u306B\u30C9\u30ED\u30C3\u30D7\u53EF\u80FD\u9818\u57DF\u304C 0 \u306B\u306A\u308B\u3068\u8A70\u3093\u3067\u3057\u307E\u3046\u306E\u3067\u3001\u9699\u9593\u3092\u4F5C\u308B */\n  &:empty {\n    padding: 16px;\n  }\n"])));
 var Handle = styled_components_1.default.div(templateObject_3 || (templateObject_3 = __makeTemplateObject(["\n  padding: 16px;\n  background: #eee;\n  cursor: grab;\n\n  & + & {\n    margin-top: 16px;\n  }\n"], ["\n  padding: 16px;\n  background: #eee;\n  cursor: grab;\n\n  & + & {\n    margin-top: 16px;\n  }\n"])));
 
-var Category = function Category(_a) {
+var CategoryTree = function CategoryTree(_a) {
   var name = _a.name,
       children = _a.children;
-  return react_1.default.createElement(Container, null, react_1.default.createElement(Handle, {
+  return react_1.default.createElement(Container, {
+    "data-category": name
+  }, react_1.default.createElement(Handle, {
     className: useDrag_1.classes.handle
   }, name), react_1.default.createElement(ItemList, {
     className: useDrag_1.classes.category
@@ -36165,18 +36205,23 @@ var Category = function Category(_a) {
 
 var Child = styled_components_1.default.div(templateObject_4 || (templateObject_4 = __makeTemplateObject(["\n  padding: 8px;\n  cursor: grab;\n"], ["\n  padding: 8px;\n  cursor: grab;\n"])));
 
-var Item = function Item(_a) {
-  var name = _a.name;
+var ItemNode = function ItemNode(_a) {
+  var slug = _a.slug,
+      name = _a.name;
   return react_1.default.createElement(Child, {
-    className: useDrag_1.classes.item
+    className: useDrag_1.classes.item,
+    "data-slug": slug,
+    "data-name": name
   }, react_1.default.createElement("div", null, name));
 };
 
 contentful_ui_extensions_sdk_1.init(function (sdk) {
-  // const initial = sdk.field.getValue()
-  // const { width, height } = sdk.parameters.instance as any
+  var initial = sdk.field.getValue();
+  var canDuplicate = sdk.parameters.instance.canDuplicate;
   react_dom_1.render(react_1.default.createElement(App, {
-    sdk: sdk
+    sdk: sdk,
+    initial: initial,
+    canDuplicate: canDuplicate
   }), document.getElementById('root'));
 });
 /**
@@ -36217,7 +36262,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "49344" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "63741" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};

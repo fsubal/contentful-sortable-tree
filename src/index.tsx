@@ -5,21 +5,24 @@ import { render } from 'react-dom'
 import { init, FieldExtensionSDK } from 'contentful-ui-extensions-sdk'
 import useDrag, { classes } from './useDrag'
 import styled from 'styled-components'
+import { Item, Category, Field } from './types'
 
 interface Props {
   sdk: FieldExtensionSDK
+  initial: Field
+  canDuplicate: boolean
 }
 
 const items1 = [
-  { slug: 'a', name: 'アクリルキーホルダー', index: 0 },
-  { slug: 'b', name: '缶バッジ', index: 1 },
-  { slug: 'c', name: 'ステッカー', index: 2 }
+  { slug: 'a', name: 'アクリルキーホルダー' },
+  { slug: 'b', name: '缶バッジ' },
+  { slug: 'c', name: 'ステッカー' }
 ]
 
 const items2 = [
-  { slug: 'a', name: '白Tシャツ', index: 0 },
-  { slug: 'b', name: 'Tシャツ（短納期）', index: 1 },
-  { slug: 'c', name: 'カラーTシャツ', index: 2 }
+  { slug: 'a', name: '白Tシャツ' },
+  { slug: 'b', name: 'Tシャツ（短納期）' },
+  { slug: 'c', name: 'カラーTシャツ' }
 ]
 
 const App = React.memo(({ sdk }: Props) => {
@@ -30,23 +33,19 @@ const App = React.memo(({ sdk }: Props) => {
 
   return (
     <div className="js-root">
-      <Category name="アクセサリー">
+      <CategoryTree name="アクセサリー">
         {items1.map(item => (
-          <Item key={item.slug} {...item} />
+          <ItemNode key={item.slug} {...item} />
         ))}
-      </Category>
-      <Category name="Tシャツ">
+      </CategoryTree>
+      <CategoryTree name="Tシャツ">
         {items2.map(item => (
-          <Item key={item.slug} {...item} />
+          <ItemNode key={item.slug} {...item} />
         ))}
-      </Category>
+      </CategoryTree>
     </div>
   )
 })
-
-interface Category {
-  name: string
-}
 
 const Container = styled.div`
   & + & {
@@ -71,7 +70,7 @@ const Handle = styled.div`
   }
 `
 
-const Category: React.FC<Category> = ({ name, children }) => {
+const CategoryTree: React.FC<Category> = ({ name, children }) => {
   return (
     <Container data-category={name}>
       <Handle className={classes.handle}>{name}</Handle>
@@ -80,18 +79,12 @@ const Category: React.FC<Category> = ({ name, children }) => {
   )
 }
 
-interface Item {
-  index: number
-  slug: string
-  name: string
-}
-
 const Child = styled.div`
   padding: 8px;
   cursor: grab;
 `
 
-const Item: React.FC<Item> = ({ slug, name }) => {
+const ItemNode: React.FC<Item> = ({ slug, name }) => {
   return (
     <Child className={classes.item} data-slug={slug} data-name={name}>
       <div>{name}</div>
@@ -100,10 +93,13 @@ const Item: React.FC<Item> = ({ slug, name }) => {
 }
 
 init((sdk: any) => {
-  // const initial = sdk.field.getValue()
-  // const { width, height } = sdk.parameters.instance as any
+  const initial = sdk.field.getValue()
+  const { canDuplicate } = sdk.parameters.instance
 
-  render(<App sdk={sdk} />, document.getElementById('root'))
+  render(
+    <App sdk={sdk} initial={initial} canDuplicate={canDuplicate} />,
+    document.getElementById('root')
+  )
 })
 
 /**

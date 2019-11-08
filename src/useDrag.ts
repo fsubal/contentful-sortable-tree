@@ -1,6 +1,7 @@
 import dragula from 'dragula'
 import { useEffect, useMemo } from 'react'
 import { FieldExtensionSDK } from 'contentful-ui-extensions-sdk'
+import { Field, Item } from './types'
 
 export const classes = {
   root: 'js-root',
@@ -8,15 +9,6 @@ export const classes = {
   handle: 'js-handle',
   item: 'js-item'
 } as const
-
-interface Item {
-  slug: string
-  name: string
-}
-
-interface Field {
-  [category: string]: Item[]
-}
 
 const toField = (root: HTMLElement): Field => {
   const categories = Array.from(root.querySelectorAll<HTMLElement>('.' + classes.category))
