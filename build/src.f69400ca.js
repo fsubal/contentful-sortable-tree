@@ -46955,6 +46955,9 @@ function useDragTree(sdk, initial) {
       tree = _a[0],
       setTree = _a[1];
 
+  var itemSort = react_1.useRef(null);
+  var categorySort = react_1.useRef(null);
+
   var autoSave = function autoSave(root) {
     var next = toField(root);
     setTree(next);
@@ -46965,7 +46968,7 @@ function useDragTree(sdk, initial) {
     var root = document.getElementsByClassName(exports.classes.root)[0]; // カテゴリ内の item を sortable にする
 
     var categories = Array.from(document.getElementsByClassName(exports.classes.category));
-    var itemSort = dragula_1.default(categories, {
+    itemSort.current = dragula_1.default(categories, {
       direction: 'vertical',
       accepts: function accepts(el) {
         if (!el) {
@@ -46978,7 +46981,7 @@ function useDragTree(sdk, initial) {
       return autoSave(root);
     }); // カテゴリそのものを sortable にする
 
-    var categorySort = dragula_1.default([root], {
+    categorySort.current = dragula_1.default([root], {
       direction: 'vertical',
       moves: function moves(_el, _source, handle) {
         if (!handle) {
@@ -46991,8 +46994,10 @@ function useDragTree(sdk, initial) {
       return autoSave(root);
     });
     return function () {
-      itemSort.destroy();
-      categorySort.destroy();
+      var _a, _b;
+
+      (_a = itemSort.current) === null || _a === void 0 ? void 0 : _a.destroy();
+      (_b = categorySort.current) === null || _b === void 0 ? void 0 : _b.destroy();
     };
   }, []);
   return tree;
@@ -51558,7 +51563,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "64858" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "51840" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};

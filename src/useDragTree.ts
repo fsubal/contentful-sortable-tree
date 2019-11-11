@@ -1,5 +1,5 @@
 import dragula from 'dragula'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { FieldExtensionSDK } from 'contentful-ui-extensions-sdk'
 import { Item, Category } from './types'
 
@@ -28,6 +28,8 @@ const toField = (root: HTMLElement): Category[] => {
 
 export default function useDragTree(sdk: FieldExtensionSDK, initial: Category[]) {
   const [tree, setTree] = useState(initial)
+  const itemSort = useRef<dragula.Drake | null>(null)
+  const categorySort = useRef<dragula.Drake | null>(null)
 
   const autoSave = (root: HTMLElement) => {
     const next = toField(root)
@@ -41,7 +43,8 @@ export default function useDragTree(sdk: FieldExtensionSDK, initial: Category[])
 
     // カテゴリ内の item を sortable にする
     const categories = Array.from(document.getElementsByClassName(classes.category))
-    const itemSort = dragula(categories, {
+
+    itemSort.current = dragula(categories, {
       direction: 'vertical',
       accepts(el) {
         if (!el) {
@@ -52,7 +55,7 @@ export default function useDragTree(sdk: FieldExtensionSDK, initial: Category[])
     }).on('dragend', () => autoSave(root))
 
     // カテゴリそのものを sortable にする
-    const categorySort = dragula([root], {
+    categorySort.current = dragula([root], {
       direction: 'vertical',
       moves(_el, _source, handle) {
         if (!handle) {
@@ -64,8 +67,8 @@ export default function useDragTree(sdk: FieldExtensionSDK, initial: Category[])
     }).on('dragend', () => autoSave(root))
 
     return () => {
-      itemSort.destroy()
-      categorySort.destroy()
+      itemSort.current?.destroy()
+      categorySort.current?.destroy()
     }
   }, [])
 
