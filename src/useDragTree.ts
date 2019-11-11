@@ -1,3 +1,4 @@
+import immer from 'immer'
 import dragula from 'dragula'
 import { useEffect, useState, useRef } from 'react'
 import { FieldExtensionSDK } from 'contentful-ui-extensions-sdk'
@@ -9,6 +10,8 @@ export const classes = {
   handle: 'js-handle',
   item: 'js-item'
 } as const
+
+const getRoot = () => document.getElementsByClassName(classes.root)[0] as HTMLElement
 
 const toField = (root: HTMLElement): Category[] => {
   const categories = Array.from(root.querySelectorAll<HTMLElement>('.' + classes.category))
@@ -28,9 +31,6 @@ const toField = (root: HTMLElement): Category[] => {
 
 export default function useDragTree(sdk: FieldExtensionSDK, initial: Category[]) {
   const [tree, setTree] = useState(initial)
-  const itemSort = useRef<dragula.Drake | null>(null)
-  const categorySort = useRef<dragula.Drake | null>(null)
-
   const autoSave = (root: HTMLElement) => {
     const next = toField(root)
 
@@ -38,10 +38,31 @@ export default function useDragTree(sdk: FieldExtensionSDK, initial: Category[])
     sdk.field.setValue(next)
   }
 
-  useEffect(() => {
-    const root = document.getElementsByClassName(classes.root)[0] as HTMLElement
+  const addCategory = (category: Category) => {
+    const root = getRoot()
+    const next = toField(root)
 
-    // カテゴリ内の item を sortable にする
+    setTree([...next, category])
+  }
+
+  const addItem = (category: Category, item: Item) => {
+    const root = getRoot()
+    const next = toField(root)
+    const categoryIndex = next.findIndex(c => c.name === category.name)
+    if (!categoryIndex) {
+      return
+    }
+
+    setTree(immer(next, n => {
+      n[categoryIndex].children.push(item)
+    }))
+  }
+
+  const itemSort = useRef<dragula.Drake | null>(null)
+  const categorySort = useRef<dragula.Drake | null>(null)
+
+  useEffect(() => {
+    const root = getRoot()
     const categories = Array.from(document.getElementsByClassName(classes.category))
 
     itemSort.current = dragula(categories, {
@@ -70,7 +91,9 @@ export default function useDragTree(sdk: FieldExtensionSDK, initial: Category[])
       itemSort.current?.destroy()
       categorySort.current?.destroy()
     }
-  }, [])
+  },
+  // 中で tree を読んではいないが、変更の度に再マウントする
+  [tree])
 
-  return tree
+  return [tree, addCategory, addItem] as const
 }

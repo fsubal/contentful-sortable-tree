@@ -16,7 +16,12 @@ interface Props {
 }
 
 const App = ({ sdk, initial }: Props) => {
-  useDragTree(sdk, initial)
+  const [tree, addCategory, addItem] = useDragTree(sdk, initial)
+
+  const doOnAddCategory = async () => {
+    const category = await prompt.category()
+    addCategory(category)
+  }
 
   useEffect(() => {
     sdk.window.startAutoResizer()
@@ -27,11 +32,13 @@ const App = ({ sdk, initial }: Props) => {
   return (
     <>
       <Header>
-        <Button icon="Plus">Add Category</Button>
+        <Button icon="Plus" onClick={doOnAddCategory}>
+          Add Category
+        </Button>
       </Header>
       <div className={classes.root}>
-        {initial.map(category => (
-          <CategoryTree key={category.name} category={category} />
+        {tree.map(category => (
+          <CategoryTree key={category.name} category={category} onAddItem={addItem} />
         ))}
       </div>
     </>
@@ -71,12 +78,21 @@ const Flex = styled.div`
   flex: 1 0;
 `
 
-const CategoryTree: React.FC<{ category: Category }> = ({ category }) => {
+const CategoryTree: React.FC<{
+  category: Category
+  onAddItem(category: Category, item: Item): void
+}> = ({ category, onAddItem }) => {
+  const doOnAddItem = async (e: React.MouseEvent<HTMLButtonElement>) => {
+    const item = {}
+    const category = await prompt.item()
+    onAddItem(category, item)
+  }
+
   return (
     <Container>
       <Handle className={classes.handle}>
         <Flex>{category.name}</Flex>
-        <Button buttonType="naked" icon="Plus">
+        <Button buttonType="naked" icon="Plus" onClick={doOnAddItem}>
           Add Item
         </Button>
       </Handle>
