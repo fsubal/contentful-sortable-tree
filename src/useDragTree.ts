@@ -58,7 +58,8 @@ export default function useDragTree(sdk: FieldExtensionSDK, initial: Category[])
         if (!handle) {
           return false
         }
-        return handle.classList.contains(classes.handle)
+
+        return !!handle.closest('.' + classes.handle)
       }
     }).on('dragend', () => autoSave(root))
 

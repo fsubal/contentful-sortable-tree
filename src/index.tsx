@@ -1,6 +1,8 @@
+import '@contentful/forma-36-react-components/dist/styles.css'
 import 'dragula/dist/dragula.css'
 
 import React, { useEffect } from 'react'
+import { Button } from '@contentful/forma-36-react-components'
 import { render } from 'react-dom'
 import { init, FieldExtensionSDK } from 'contentful-ui-extensions-sdk'
 import useDragTree, { classes } from './useDragTree'
@@ -23,13 +25,22 @@ const App = ({ sdk, initial }: Props) => {
   // dragula の DOM 操作と React のレンダリングが食い違うのを防ぐため、
   // 初回レンダリングしかしない
   return (
-    <div className={classes.root}>
-      {initial.map(category => (
-        <CategoryTree key={category.name} category={category} />
-      ))}
-    </div>
+    <>
+      <Header>
+        <Button icon="Plus">Add Category</Button>
+      </Header>
+      <div className={classes.root}>
+        {initial.map(category => (
+          <CategoryTree key={category.name} category={category} />
+        ))}
+      </div>
+    </>
   )
 }
+
+const Header = styled.div`
+  margin-bottom: 24px;
+`
 
 const Container = styled.div`
   & + & {
@@ -45,7 +56,9 @@ const ItemList = styled.div`
 `
 
 const Handle = styled.div`
-  padding: 16px;
+  display: flex;
+  align-items: center;
+  padding: 8px 16px;
   background: #eee;
   cursor: grab;
 
@@ -54,10 +67,19 @@ const Handle = styled.div`
   }
 `
 
+const Flex = styled.div`
+  flex: 1 0;
+`
+
 const CategoryTree: React.FC<{ category: Category }> = ({ category }) => {
   return (
     <Container>
-      <Handle className={classes.handle}>{category.name}</Handle>
+      <Handle className={classes.handle}>
+        <Flex>{category.name}</Flex>
+        <Button buttonType="naked" icon="Plus">
+          Add Item
+        </Button>
+      </Handle>
       <ItemList className={classes.category} data-category={category.name}>
         {category.children.map(item => (
           <ItemNode key={item.slug} {...item} />
